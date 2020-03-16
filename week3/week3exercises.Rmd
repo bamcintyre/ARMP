@@ -1,0 +1,194 @@
+---
+title: "Week 3 Exercises"
+author: "Amy Perfors"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# We'll begin by loading up the libraries and data we need, as always.
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading the libraries
+library(tidyverse)
+library(knitr)
+library(here)
+
+# loading the data
+loc <- here("gladlysurvey2.csv")
+gdata <- read_csv(file=loc)
+```
+
+## Day 1
+
+### Tables
+
+1. Create a summary table of the foods in Gladly’s data set. As a first step, just use the `table()` function. Once you get that to work, make it look nice with `kable()` and knit the HTML file to see the output.
+
+```{r day1tables1, echo=FALSE}
+
+```
+
+2. Make a cross tab of year by age. (Don’t worry about using `kable()` to make it look nice). By looking at the data this way you should be able to find an error in the dataset — something that doesn’t make sense. Can you see it? What is it?
+
+```{r day1tables2, echo=FALSE}
+
+```
+
+3. Create a summary table of foods by species in the dataset, and make it look nice with `kable()`. (This will be kind of big). See if you can figure out how to align the items in the centre of the cells. (Hint: use the `help()` function to learn more about `kable()`).
+
+```{r day1tables3, echo=FALSE}
+
+```
+
+### Pipes
+
+1. The following code generates 100 random numbers from a normal distribution and calculates the mean of those numbers. Rewrite it using pipes. 
+
+```{r day1pipes1, eval=FALSE}
+# old code
+nums <- rnorm(n=100)
+meanNums <- mean(nums)
+
+# new code
+
+```
+
+2. The following code generates 100 random numbers from a normal distribution with mean 100 and standard deviation 15. It then calculates the trimmed mean of those numbers. Rewrite it using pipes. Assign it to a new variable at the end. (A trimmed mean is the mean calculated on the dataset with a certain proportion of the ends removed. In this example, 20% is trimmed off each end. This is often more robust to extreme outliers than just taking the mean is.)
+
+```{r day1pipes2}
+# old code
+nums <- rnorm(n=100,mean=100,sd=15)
+meanNums <- mean(nums,trim=0.2)
+
+# new code
+
+```
+
+### Grouping
+
+1. Group Gladly's data by species, and for each species calculate two variables: `mnCarrot` (which gives the mean answer to the carrot question) and `sumCarrot` (which gives the sum of everyone of that species answers to the carrot question). Note: you’ll have to use `na.rm` because there are some missing datapoints. Which of these do you think is more informative about how each species answers the question, and why?
+
+```{r day1grouping1}
+
+```
+
+2. What is the difference, if any, between `group_by(species,gender)` and `group_by(gender,species)`?
+
+```{r day1grouping2}
+
+```
+
+
+3. Group Gladly’s data by gender, and for each gender calculate `lowQn` (the 25th quantile), `hiQn` (the 75th quantile), and `median` (the 50th quantile).
+
+```{r day1grouping3}
+
+```
+
+4. Challenge: in the last slide we calculated `stdErr` using the summary statistics calculated in a previous `group_by()` command. It’s possible to do this all in one set of pipes (i.e., without having to save the intermediate tibble). See if you can figure out how to do this. NOTE: if you can't do this, don’t worry! I just want you to practice playing around for yourself, but it's not necessarily intuitively obvious.
+
+```{r day1grouping4}
+
+```
+
+
+## Day 2
+
+### Filter and arrage
+
+1. Create a new tibble called `oldies` which contains just the people who are age five or more. 
+
+```{r day2filter1}
+
+```
+
+2. Filter the `oldies` tibble so it contains just the female ones, and arrange the output by species.
+
+```{r day2filter2}
+
+```
+
+3. Instead of doing #1 and #2 as two separate pipes with the variable `oldies` created halfway through, combine them so you do it all in one long piped command. (Hint: you’ll use the & operator)
+
+```{r day2filter3}
+
+```
+
+4. Calculate the mean age for only the bears, split by gender (i.e., the mean age of the male bears and the mean age of the female bears). Hint: use the `group_by()` and `summarise()` functions as well as `filter()`.
+
+```{r day2filter4}
+
+```
+
+5. Create a tibble that shows — for bunnies only — how many bunnies preferred each food. (Hint: you’ll need to use `filter()`, `group_by()`, and `summarise()` as well as `n()`, and the variable `food`).
+
+```{r day2filter5}
+
+```
+
+6. Create a tibble called `bunnyCarrot` which shows — for bunnies only — the mean rating on the carrot question, split by gender. If you change the order of the commands, does this change things? Why or why not?
+
+```{r day2filter6}
+
+```
+
+
+### Select and mutate
+
+1. Create a new tibble called `foodTibble` which contains just the names and answers to the three food questions (carrot, mud, and cake).
+
+```{r day2select1}
+
+```
+
+2. Add a new column to `foodTibble` called `totalLiking` which is the sum of the three food questions.
+
+```{r day2select2}
+
+```
+
+3. Instead of doing #1 and #2 as two separate pipes with the variable `foodTibble` created halfway through, combine them so you do it all in one long piped command.
+
+```{r day2select3}
+
+```
+
+4. Create a new tibble called `likingTibble` which: contains just the species, gender, and the three food questions; adds a new column called `avgLiking` which is the average of the three food questions; and groups by species and calculates the average `avgLiking` by species as well as the number of people in each species. Hint: you’ll have to use most of the functions from this week, not just select and mutate.
+
+```{r day2select4}
+
+```
+
+5. Create a tibble called `nameTibble` which contains just the names and genders; adds a column called `nameLength` which uses the `nchar()` function to calculate the length of each person’s name; then groups by genders and calculates the average `nameLength` and the standard deviation of `nameLength` for each gender.
+
+```{r day2select5}
+
+```
+
+### Pivoting wider and longer
+
+1. Take `gLong` and make it wider so that each column is one of the genders, rather than one of the species. 
+
+```{r day2pivot1}
+
+```
+
+2. Take your output from #1 and convert it back to long form. Get rid of any excess NAs that have appeared.
+
+```{r day2pivot2}
+
+```
+
+3. Take the original `gdata` tibble and make a new tibble called gdataLong which combines the three answers to the food rating questions (carrot, cake, and mud). The name of the column with the original column names (carrot, cake, and mud) should be called `choices` and the name of the column with the actual rating for each should be called `rating`. Keep all of the other columns in the original `gdata` tibble (i.e., keep name, species, year, food, age, and gender).
+
+```{r day2pivot3}
+
+```
+
+4. Convert `gdataLong` back to a wide-form tibble called `gdataWide`. Is `gdataWide` equivalent to `gdata`?
+
+```{r day2pivot4}
+
+```
+
+

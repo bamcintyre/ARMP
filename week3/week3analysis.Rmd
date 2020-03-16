@@ -1,0 +1,87 @@
+---
+title: "Week 3 analysis"
+author: "Amy"
+date: "18/01/2020"
+output: html_document
+---
+
+We'll begin by loading up the libraries and data we need, as always.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading the libraries
+library(tidyverse)
+library(knitr)
+library(here)
+
+# loading the data
+loc <- here("gladlysurvey2.csv")
+gdata <- read_csv(file=loc)
+```
+
+First let's try making a table of people's colours.
+
+```{r sampletablechunk}
+colours <- c("grey","brown","navy","white","white","pink","pink")
+colourtable <- table(colours)
+```
+
+This is kind of ugly. Let's fix it:
+
+```{r sampletablechunk2, results="asis", echo=FALSE}
+kable(colourtable, caption="Here is a table of people's colours")
+```
+
+
+Next let's try some cross-tabulation of colours by gender.
+
+```{r samplectchunk, results="asis", echo=FALSE}
+genders <- c("female","male","female","male","female","nb","female")
+cgtable <- table(genders,colours)
+kable(cgtable, caption="Here is a table of people's colours by gender")
+```
+
+Finally, let's make a table of some of Gladly's data. First, how many do we have of each species?
+
+```{r specieschunk, results="asis", echo=FALSE}
+speciestable <- table(gdata$species)
+kable(speciestable, caption="All species in Gladly's data", col.names=c("Species","Frequency"))
+```
+
+Let's use pipes and some of our dplyr functions to do some data manipulation. First, we're going to calculate the mean age for each gender using the `group_by()` and `summarise()` functions.
+
+```{r genderagesummary, echo=FALSE}
+gdata %>%
+  group_by(gender,species) %>%
+  summarise(mnAge = mean(age),
+            sdAge = sd(age),
+            nAge = n()) %>%
+  ungroup()
+```
+
+Now we're going to do some filtering and arranging
+
+```{r simplefilter, echo=FALSE}
+females <- gdata %>%
+  filter(gender=="female")
+
+females %>%
+  group_by(species) %>%
+  summarise(mnAge = mean(age),
+            nAge = n()) %>%
+  ungroup()
+```
+
+Now let's bring it all together.
+
+```{r bringingtogether, echo=FALSE}
+gdata %>%
+  filter(!is.na(mud)) %>%
+  mutate(goodFood = (carrot+cake)/2)  %>%
+  group_by(gender) %>%
+  summarise(meanGoodFood = mean(goodFood),
+            meanBadFood = mean(mud)) %>%
+  ungroup()
+```
+
