@@ -125,13 +125,14 @@ gdata %>%
 4. Challenge: in the last slide we calculated `stdErr` using the summary statistics calculated in a previous `group_by()` command. It’s possible to do this all in one set of pipes (i.e., without having to save the intermediate tibble). See if you can figure out how to do this. NOTE: if you can't do this, don’t worry! I just want you to practice playing around for yourself, but it's not necessarily intuitively obvious.
 
 ```{r day1grouping4}
-genderSpeciesData <- gdata %>%
+gdata %>%
   group_by(gender, species) %>%
   summarise(mnAge = mean(age, na.rm = TRUE),
             sdAge = sd(age, na.rm = TRUE),
             nAge = n()) %>%
+  group_by(gender, species) %>%
+  summarise(stdErr = sdAge/sqrt(nAge)) %>% 
   ungroup()
-genderSpeciesData
 ```
 
 
