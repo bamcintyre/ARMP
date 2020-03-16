@@ -26,17 +26,33 @@ gdata <- read_csv(file=loc)
 
 ```{r day1tables1, echo=FALSE}
 
+foodtable <- table(gdata[["food"]])
+kable(foodtable)
+
 ```
 
 2. Make a cross tab of year by age. (Don’t worry about using `kable()` to make it look nice). By looking at the data this way you should be able to find an error in the dataset — something that doesn’t make sense. Can you see it? What is it?
 
 ```{r day1tables2, echo=FALSE}
 
+year_age <- table(gdata[["year"]], gdata[["age"]])
+year_age
+#work out the current year
+today <- Sys.Date()
+current_year <- as.integer(format(today, "%Y"))
+#compute age of toys
+computed_age <- current_year - gdata$year 
+#compare computed age of toy to that in dataset and show which is different by name
+gdata$name[gdata[["age"]] != computed_age]
+
 ```
 
 3. Create a summary table of foods by species in the dataset, and make it look nice with `kable()`. (This will be kind of big). See if you can figure out how to align the items in the centre of the cells. (Hint: use the `help()` function to learn more about `kable()`).
 
 ```{r day1tables3, echo=FALSE}
+
+foods_by_species <- table(gdata$species, gdata$food)
+kable(foods_by_species, align = "c")
 
 ```
 
@@ -46,11 +62,12 @@ gdata <- read_csv(file=loc)
 
 ```{r day1pipes1, eval=FALSE}
 # old code
+set.seed(43)
 nums <- rnorm(n=100)
 meanNums <- mean(nums)
 
 # new code
-
+newMeanNums <- rnorm(n=100) %>% mean()
 ```
 
 2. The following code generates 100 random numbers from a normal distribution with mean 100 and standard deviation 15. It then calculates the trimmed mean of those numbers. Rewrite it using pipes. Assign it to a new variable at the end. (A trimmed mean is the mean calculated on the dataset with a certain proportion of the ends removed. In this example, 20% is trimmed off each end. This is often more robust to extreme outliers than just taking the mean is.)
@@ -61,7 +78,9 @@ nums <- rnorm(n=100,mean=100,sd=15)
 meanNums <- mean(nums,trim=0.2)
 
 # new code
-
+newTrimMeanNums <- nums %>% mean(trim = 0.2)
+hist(nums)
+newTrimMeanNums
 ```
 
 ### Grouping
@@ -69,12 +88,25 @@ meanNums <- mean(nums,trim=0.2)
 1. Group Gladly's data by species, and for each species calculate two variables: `mnCarrot` (which gives the mean answer to the carrot question) and `sumCarrot` (which gives the sum of everyone of that species answers to the carrot question). Note: you’ll have to use `na.rm` because there are some missing datapoints. Which of these do you think is more informative about how each species answers the question, and why?
 
 ```{r day1grouping1}
-
+gdata %>%
+  group_by(species) %>%
+  summarise(mnCarrot = mean(carrot, na.rm = TRUE),
+            sumCarrot = sum(carrot, na.rm = TRUE)) %>%
+  ungroup()
 ```
 
 2. What is the difference, if any, between `group_by(species,gender)` and `group_by(gender,species)`?
 
 ```{r day1grouping2}
+gdata %>%
+  group_by(species, gender) %>% 
+  summarise(meanAge = mean(age)) %>%
+  ungroup()
+gdata %>%
+  group_by(gender, species) %>% 
+  summarise(meanAge = mean(age)) %>%
+  ungroup()
+
 
 ```
 
@@ -82,13 +114,24 @@ meanNums <- mean(nums,trim=0.2)
 3. Group Gladly’s data by gender, and for each gender calculate `lowQn` (the 25th quantile), `hiQn` (the 75th quantile), and `median` (the 50th quantile).
 
 ```{r day1grouping3}
-
+gdata %>%
+  group_by(gender) %>%
+  summarise(loQn = quantile(age, c(0.25), na.rm = TRUE),
+            hiQn = quantile(age, c(0.75), na.rm = TRUE),
+            median = median(age, na.rm = TRUE)) %>%
+  ungroup()
 ```
 
 4. Challenge: in the last slide we calculated `stdErr` using the summary statistics calculated in a previous `group_by()` command. It’s possible to do this all in one set of pipes (i.e., without having to save the intermediate tibble). See if you can figure out how to do this. NOTE: if you can't do this, don’t worry! I just want you to practice playing around for yourself, but it's not necessarily intuitively obvious.
 
 ```{r day1grouping4}
-
+genderSpeciesData <- gdata %>%
+  group_by(gender, species) %>%
+  summarise(mnAge = mean(age, na.rm = TRUE),
+            sdAge = sd(age, na.rm = TRUE),
+            nAge = n()) %>%
+  ungroup()
+genderSpeciesData
 ```
 
 
