@@ -52,9 +52,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(knitr)
 library(here)
+library(skimr)
 # you'll need to add a few more libraries as you go
 
 # ** you need to load the data using the here() function, as in the example in class
+loc <- here("shadowsurvey.csv")
 d <- read_csv(file=loc)
 ```
 
@@ -80,6 +82,7 @@ Let's first get a sense of the dataset. Use the `skim` command to do so. Note: y
 
 ```{r skimdatachunk, echo=FALSE}
 # insert your code here
+skim(r)
 ```
 
 # Q3
@@ -88,6 +91,14 @@ It's really annoying to have all six of these survey questions when really there
 
 ```{r makenewvarschunk, echo=FALSE}
 # insert your code here
+goodFoods <- c("carrot", "cake", "bean", "meat")
+badFoods <- c("mud", "dirt")
+d$goodFood <- apply(d[,goodFoods], MARGIN = 1,FUN = mean)
+# the above works -- the below doesn't.... not sure why lol.
+#d$goodFood <- mean(d[,goodFoods])
+d$badFood <- apply(d[,badFoods], MARGIN = 1,FUN = mean)
+ d[,goodFoods]
+d[c("goodFood", "badFood")]
 ```
 
 # Q4
