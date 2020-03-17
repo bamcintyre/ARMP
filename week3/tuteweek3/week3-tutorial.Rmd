@@ -82,7 +82,7 @@ Let's first get a sense of the dataset. Use the `skim` command to do so. Note: y
 
 ```{r skimdatachunk, echo=FALSE}
 # insert your code here
-skim(r)
+skim(d)
 ```
 
 # Q3
