@@ -211,6 +211,11 @@ d %>%
   ) %>%
   ungroup() %>%
   kable()
+
+# haha realised you wanted me to use table()
+# weird slightly tidyverse slightly oldschool code ugh
+table(d$year) %>% kable(col.names = c("year", "frequency"))
+
   
 ```
 
@@ -221,14 +226,10 @@ Let's get a breakdown of what species are represented each year. Make a table of
 ```{r yearspecieschunk, echo=FALSE}
 #first attempt
 d %>%
-group_by(year, species) %>%
-  summarise(
-    unique(species)
-  ) %>%
+group_by(year) %>%
+  %>%
   ungroup
 #nope
-
-
 ```
 
 # Q8
