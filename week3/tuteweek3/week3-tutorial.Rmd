@@ -53,6 +53,7 @@ library(tidyverse)
 library(knitr)
 library(here)
 library(skimr)
+library(lsr)
 # you'll need to add a few more libraries as you go
 
 # ** you need to load the data using the here() function, as in the example in class
@@ -107,20 +108,28 @@ Make your own histogram for the two new variables you've made (goodFood and badF
 
 ```{r histogramchunk, echo=FALSE}
  #partition the graphics device, 2stacked
-par(mfrow = c(2, 2))
+par(mfrow = c(2, 1))
 # calculated a common max and min to allow horizontal alignment
 # then make 2 histograms (that code seems pretty self-explanatory)
 #  stolen from https://stackoverflow.com/questions/19375779/how-to-set-xlim-in-a-hist-plot-while-showing-the-full-range-of-the-variable-in
-xrange <- range( c(d[["goodFood"]],d[["badFood"]]) )
+xrange <- range( c(d[["goodFood"]], d[["badFood"]]) )
 xrange
+# so here i was  using mode but should have used max freq from lsr
+# idiot but hey
+# yrange <- range( c(0, mode( c(d[["goodFood"]],d[["badFood"]]) )))
+# let's work out the max freq so both plots have same vertical scale
+
+yrange <- range( c(0, maxFreq( c(d[["goodFood"]],d[["badFood"]]), na.rm = TRUE )))
+#mode(c(d[["goodFood"]], d[["badFood"]]), rm.na = TRUE)
+yrange
 hist(
   x = d[["goodFood"]], breaks = "Sturges",
   freq = TRUE, 
   include.lowest = TRUE, right = TRUE,
   density = 20, angle = 45, col = "blue", border = NULL,
   main = "Frequency histogram of Good Foods",
-  xlim = xrange, ylim = NULL,
-   xlab = "response", ylab = "Frequency",
+  xlim = xrange, ylim = yrange,
+   xlab = "Rating", ylab = "Frequency",
    #  axes = TRUE, plot = TRUE, labels = FALSE,
   #   nclass = NULL, warn.unused = TRUE
 )
@@ -130,14 +139,14 @@ hist(
   include.lowest = TRUE, right = TRUE,
   density = 20, angle = 45, col = "blue", border = NULL,
   main = "Frequency histogram of Bad Foods",
-  xlim = xrange, ylim = NULL,
-     xlab = "response", ylab = "Frequency",
+  xlim = xrange, ylim = yrange,
+     xlab = "Rating", ylab = "Frequency",
    #  axes = TRUE, plot = TRUE, labels = FALSE,
   #   nclass = NULL, warn.unused = TRUE
 )
-hist(
-  x = d[["badFood"]]
-)
+#hist(
+#  x = d[["badFood"]]
+#)
 
 ```
 
@@ -147,7 +156,46 @@ hist(
 Calculate the mean, median, mode, and 10th and 90th quantile of `goodFood` and `badFood`. Don't use `skim()`, use the functions for each. (Note: you may need to load another library). Do these numbers make sense in light of the histograms?
 
 ```{r centraltendencychunk}
-# insert your code here
+
+my_descriptives<- function(data, summary_var) {
+  summary_var <- enquo(summary_var)
+  data %>% 
+    summarise(#column = colnames(UQ(summary_var)),
+      mean = mean(!!summary_var), 
+              median = median(!!summary_var), 
+              mode = modeOf(!!summary_var), 
+              "10th" = quantile(!!summary_var, probs = .1), 
+              "90th" = quantile(!!summary_var, probs = .9))
+}
+
+#my_descriptives(d, goodFood)
+
+# but i cant get a) the column names or b) do more than one column
+# lets do this old-school
+
+mysummary <- function(x) {
+ result <- c(
+   mean(x, na.rm = TRUE),
+   median(x, na.rm = TRUE),
+   modeOf(x, na.rm = TRUE),
+   quantile(x, probs = .1, na.rm = TRUE),
+   quantile(x, probs = .9, na.rm = TRUE))
+ names(result) <- c("Mean", "Median", "Mode", "10% QT", "90% QT")
+ return(result)
+}
+
+
+# So I wanted to make a table of these in a function but giving up now haha
+# i was defeated 
+
+food_opinions <- c("goodFood", "badFood")
+sumdf <- lapply(d[food_opinions], mysummary)
+sumdf
+#sumdf %>%
+#  gather(var, val, 2:ncol(sumdf)) %>%
+#  spread(var, val)
+#c(mean(),median(), modeOf(), quantile(probs = .1), quantile(probs = .9))
+
 ```
 
 # Q6
@@ -155,6 +203,7 @@ Calculate the mean, median, mode, and 10th and 90th quantile of `goodFood` and `
 One of the different things about this dataset (compared to Gladly's) is that there is data from multiple years. So let's investigate it! Make a frequency table showing the number of data points for each year, and use the `kable()` function to make it look nice. How is it changing over time? Why do you suppose it is?
 
 ```{r yeartablechunk, echo=FALSE}
+
 # insert your code here
 ```
 
