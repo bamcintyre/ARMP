@@ -204,7 +204,14 @@ One of the different things about this dataset (compared to Gladly's) is that th
 
 ```{r yeartablechunk, echo=FALSE}
 
-# insert your code here
+d %>%
+  group_by(year) %>%
+  summarise(
+    n()
+  ) %>%
+  ungroup() %>%
+  kable()
+  
 ```
 
 # Q7
@@ -212,7 +219,16 @@ One of the different things about this dataset (compared to Gladly's) is that th
 Let's get a breakdown of what species are represented each year. Make a table of species by year, and make it look nice using `kable()`. The columns should be the years and the rows the species.
 
 ```{r yearspecieschunk, echo=FALSE}
-# insert your code here
+#first attempt
+d %>%
+group_by(year, species) %>%
+  summarise(
+    unique(species)
+  ) %>%
+  ungroup
+#nope
+
+
 ```
 
 # Q8
