@@ -226,10 +226,20 @@ Let's get a breakdown of what species are represented each year. Make a table of
 ```{r yearspecieschunk, echo=FALSE}
 #first attempt
 d %>%
-group_by(year) %>%
-  %>%
-  ungroup
+group_by(year, species) %>%
+  summarise(freq = n()) %>%
+ pivot_wider(
+   names_from = year,
+   values_from = freq,
+   values_fill = list(freq = 0)
+  ) %>%
+  ungroup() %>%
+  kable()
 #nope
+
+#again i realise this is about table lol
+
+  table(d$species, d$year) %>% kable()
 ```
 
 # Q8
