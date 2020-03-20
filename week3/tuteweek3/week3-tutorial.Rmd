@@ -249,7 +249,14 @@ Let's first see if there are gender differences in how people answer the questio
 To look at this, use the `group_by()` and `summarise()` functions to group the data by gender and calculate the mean `goodFood` and mean `badFood` for each gender Remember to ungroup! What does your data seem to suggest?
 
 ```{r gendergroupchunk, echo=FALSE}
-# insert your code here
+d %>%
+  group_by(gender) %>%
+  select(goodFood, badFood) %>%
+  summarise("Good Food" = mean(goodFood),
+            "Bad Food" = mean(badFood)
+            ) %>%
+  ungroup() %>%
+  kable()
 ```
 
 # Q9
@@ -257,6 +264,14 @@ To look at this, use the `group_by()` and `summarise()` functions to group the d
 Another interesting thing to look at would be how the answers to the questions change over time. To look at this, use the `group_by()` and `summarise()` functions to group the data by year and calculate the mean and sd for `goodFood`, the mean and sd for `badFood`, and the n for each year. Remember to ungroup! What does your data seem to suggest?
 
 ```{r yeargroupchunk, echo=FALSE}
-# insert your code here
+d %>%
+  group_by(year) %>%
+  summarise(
+   "Mean (goodFood)" = mean(goodFood),
+  "SD (goodFood)" = sd(goodFood),
+  "Mean (badFood)" = mean(badFood),
+  "SD (badFood)" = sd(badFood),
+  "n" = n(),
+  )
 ```
 
