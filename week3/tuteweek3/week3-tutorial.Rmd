@@ -174,14 +174,14 @@ my_descriptives<- function(data, summary_var) {
 # lets do this old-school
 
 mysummary <- function(x) {
- result <- c(
+ result <- list(
    mean(x, na.rm = TRUE),
    median(x, na.rm = TRUE),
    modeOf(x, na.rm = TRUE),
    quantile(x, probs = .1, na.rm = TRUE),
    quantile(x, probs = .9, na.rm = TRUE))
  names(result) <- c("Mean", "Median", "Mode", "10% QT", "90% QT")
- return(result)
+ return(as.vector(result))
 }
 
 
@@ -191,11 +191,20 @@ mysummary <- function(x) {
 food_opinions <- c("goodFood", "badFood")
 sumdf <- lapply(d[food_opinions], mysummary)
 sumdf
+
+str(sumdf$goodFood)
+
 #sumdf %>%
 #  gather(var, val, 2:ncol(sumdf)) %>%
 #  spread(var, val)
 #c(mean(),median(), modeOf(), quantile(probs = .1), quantile(probs = .9))
 
+# ok lets do this
+d %>%
+  summarise(
+       mysummary(goodFood),
+ #      mysummary(badFood)
+  )
 ```
 
 # Q6
@@ -272,6 +281,7 @@ d %>%
   "Mean (badFood)" = mean(badFood),
   "SD (badFood)" = sd(badFood),
   "n" = n(),
-  )
+  ) %>%
+  ungroup()
 ```
 
