@@ -227,19 +227,44 @@ foodTibble
 3. Instead of doing #1 and #2 as two separate pipes with the variable `foodTibble` created halfway through, combine them so you do it all in one long piped command.
 
 ```{r day2select3}
+gdata %>%
+  select(name,carrot,cake,mud) %>%
+  mutate(totalLiking = rowSums(.[c("carrot", "cake", "mud")]))
+
 
 ```
 
 4. Create a new tibble called `likingTibble` which: contains just the species, gender, and the three food questions; adds a new column called `avgLiking` which is the average of the three food questions; and groups by species and calculates the average `avgLiking` by species as well as the number of people in each species. Hint: you’ll have to use most of the functions from this week, not just select and mutate.
 
 ```{r day2select4}
-
+likingTibble <- gdata %>%
+  select(species, gender, carrot, cake, mud) %>%
+  mutate(avgLiking = apply( .[c("carrot", "cake", "mud")], 1, mean)) %>%
+  filter(!is.na(avgLiking)) %>%
+group_by(species) %>%
+  summarise(
+    "Mean food liking" = mean(avgLiking),
+    "N" = n()
+  ) %>%
+  ungroup()
+likingTibble
 ```
 
 5. Create a tibble called `nameTibble` which contains just the names and genders; adds a column called `nameLength` which uses the `nchar()` function to calculate the length of each person’s name; then groups by genders and calculates the average `nameLength` and the standard deviation of `nameLength` for each gender.
 
 ```{r day2select5}
-
+nameTibble <- gdata %>%
+  select(name,gender) %>%
+  mutate(nameLength = nchar(name)) %>%
+  filter(!is.na(nameLength)) %>%
+  group_by(gender) %>%
+  summarise(
+    "Mean name length" = mean(nameLength),
+    "SD" = sd(nameLength),
+    "n" = n()
+  ) %>%
+  ungroup()
+nameTibble
 ```
 
 ### Pivoting wider and longer
