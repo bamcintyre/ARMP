@@ -206,13 +206,22 @@ bunnyCarrot
 1. Create a new tibble called `foodTibble` which contains just the names and answers to the three food questions (carrot, mud, and cake).
 
 ```{r day2select1}
-
+foodTibble <- gdata %>%
+  select(carrot, mud, cake)
+foodTibble
 ```
 
 2. Add a new column to `foodTibble` called `totalLiking` which is the sum of the three food questions.
 
 ```{r day2select2}
-
+foodTibble %>%
+  mutate(totalLiking = carrot + cake + mud )
+# why can't i use sum(carrot, cake, mud) here?
+foodTibble
+# ok try after google
+foodTibble %>%
+  mutate(totalLikingRowSum = rowSums(.[c("carrot", "cake", "mud")]))
+foodTibble
 ```
 
 3. Instead of doing #1 and #2 as two separate pipes with the variable `foodTibble` created halfway through, combine them so you do it all in one long piped command.
