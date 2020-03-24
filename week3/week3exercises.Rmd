@@ -14,6 +14,7 @@ library(knitr)
 library(here)
 
 # loading the data
+here()
 loc <- here("gladlysurvey2.csv")
 gdata <- read_csv(file=loc)
 ```
@@ -272,25 +273,62 @@ nameTibble
 1. Take `gLong` and make it wider so that each column is one of the genders, rather than one of the species. 
 
 ```{r day2pivot1}
+# make gLong
+gLong <- gdata %>%
+         mutate(goodFood = (carrot+cake)/2) %>%
+         select(species,gender,goodFood) %>%
+         group_by(gender,species) %>%
+         summarise(meanGood = mean(goodFood,na.rm=TRUE)) %>%
+         ungroup()
+gLong
+gLong %>%
+  pivot_wider(
+    names_from = gender,
+    values_from = meanGood
+  )
 
 ```
 
 2. Take your output from #1 and convert it back to long form. Get rid of any excess NAs that have appeared.
 
 ```{r day2pivot2}
+gLong %>%
+  pivot_wider(
+    names_from = gender,
+    values_from = meanGood
+  ) %>%
+  pivot_longer(
+    cols = -species, 
+    names_to = "gender",
+    values_to = "meanGood"
+  ) %>%
+  filter(!is.na(meanGood)) %>%
+  arrange(gender, species)
 
 ```
 
 3. Take the original `gdata` tibble and make a new tibble called gdataLong which combines the three answers to the food rating questions (carrot, cake, and mud). The name of the column with the original column names (carrot, cake, and mud) should be called `choices` and the name of the column with the actual rating for each should be called `rating`. Keep all of the other columns in the original `gdata` tibble (i.e., keep name, species, year, food, age, and gender).
 
 ```{r day2pivot3}
-
+gdataLong <- gdata %>%
+  pivot_longer(
+    cols = c(carrot, cake, mud),
+  names_to = "choices",
+  values_to = "rating"
+  )
+gdataLong
 ```
 
 4. Convert `gdataLong` back to a wide-form tibble called `gdataWide`. Is `gdataWide` equivalent to `gdata`?
 
 ```{r day2pivot4}
-
+gdataWide <- gdataLong %>%
+  pivot_wider(
+      names_from = choices,
+      values_from = rating
+  )
+gdataWide
+gdata
 ```
 
 
