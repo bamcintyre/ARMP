@@ -58,7 +58,7 @@ library(lsr)
 
 # ** you need to load the data using the here() function, as in the example in class
 
-loc <- here("tuteweek3", "shadowsurvey.csv")
+loc <- here("shadowsurvey.csv")
 #not sure why the above broke--there are many Rproj files from various tutes and lectures about
 # and I think it may be confusing here command 
 d <- read_csv(file=loc)
@@ -211,10 +211,17 @@ str(sumdf$goodFood)
 
 # ok lets do this
 d %>%
+pivot_longer(cols = c(goodFood, badFood), names_to = "foodType", values_to = "foodRating") %>%
+  group_by(foodType) %>%
   summarise(
-       mysummary(goodFood),
- #      mysummary(badFood)
-  )
+      "Mean" = mean(foodRating),
+      "Median" = median(foodRating),
+      "Mode" = modeOf(foodRating),
+      "10% Quartile" = quantile(foodRating, probs = .1),
+      "90% Quartile" = quantile(foodRating, probs = .9)
+  ) %>%
+  ungroup()
+
 ```
 
 # Q6
