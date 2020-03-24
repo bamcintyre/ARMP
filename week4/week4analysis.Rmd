@@ -1,0 +1,282 @@
+---
+title: "Week 4 Analyses"
+author: "Amy Perfors"
+output: html_document
+---
+
+This is the code corresponding to the lectures in Week 4.
+
+```{r setup, include=FALSE}
+# We'll begin by loading up the libraries and data we need, as always.
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading the libraries
+library(tidyverse)
+library(knitr)
+library(here)
+library(ggplot2)
+
+loc <- here("shadowsurvey.csv")
+d <- read_csv(file=loc)
+d$year <- as.factor(d$year)
+```
+
+# Day 1
+
+## Grammar of graphics 
+
+In order to put this in a format that works well with our graphics package, we're going to need to make some new variables and change it to a longer format. For those things we'll need to use the skills we learned last week. First, let's make two new variables, one showing each person's average answer to the `goodFood` questions (carrot, bean, cake, and meat) and one showing the answers to the `badFood` questions (mud and dirt). 
+
+```{r makenewvars, echo=FALSE}
+dnew <- d %>%
+  mutate(goodFood = (carrot+bean+cake+meat)/4) %>%
+  mutate(badFood = (mud+dirt)/2)
+dnew
+```
+
+Then let's put this into long form by question type, and remove all of the specific questions leaving only `goodFood` and `badFood`:
+
+```{r makelong, echo=FALSE}
+dl <- dnew %>%
+  pivot_longer(-c(name,gender,species,year),names_to="question",values_to="rating") %>%
+  filter(question=="goodFood" | question=="badFood")
+dl
+```
+
+Now let's make a plot!
+
+
+```{r makefirstplot, echo=FALSE}
+dl %>% 
+  ggplot(
+    mapping = aes(
+      x = year, 
+      y = rating,
+      colour = question
+    ) 
+  ) + 
+  geom_jitter(size=3) +
+  geom_rug() + 
+  facet_wrap(~gender) +
+  theme_bw() + 
+  labs(
+    title = "Food ratings over time",
+    subtitle = "Varying question type and gender",
+    x = "Year",
+    y = "Rating on 1-10 scale"
+  )
+```
+
+## Geoms
+
+Let's play with geoms a bit. First, let's consider the kinds of geoms that take only one continuous variable, like histograms.
+
+```{r fdsfds}
+dnew %>%
+  ggplot(mapping = aes(x=goodFood)) +
+  geom_density() +
+  theme_bw() +
+  labs(title = "Density of goodFood ratings",
+       x = "Rating",
+       y = "Frequency")
+```
+
+```{r histplot, echo=FALSE}
+dnew %>% 
+  ggplot(
+    mapping = aes(
+      x = goodFood
+    ) 
+  ) + 
+  geom_histogram(binwidth=0.5) +
+  theme_bw() + 
+  labs(
+    title = "Histogram of good food ratings",
+    x = "Rating on 1-10 scale",
+    y = "# of people giving that rating"
+  )
+```
+
+A density plot:
+
+```{r densityplot, echo=FALSE}
+dnew %>% 
+  ggplot(
+    mapping = aes(
+      x = goodFood
+    ) 
+  ) + 
+  geom_density() +
+  theme_bw() + 
+  labs(
+    title = "Density of good food ratings",
+    x = "Rating on 1-10 scale",
+    y = "Density"
+  )
+```
+
+A dot plot:
+
+```{r dotplot, echo=FALSE}
+dnew %>% 
+  ggplot(
+    mapping = aes(
+      x = goodFood
+    ) 
+  ) + 
+  geom_dotplot(binwidth=0.1) +
+  theme_bw() + 
+  labs(
+    title = "Dot plot of good food ratings",
+    x = "Rating on 1-10 scale",
+    y = ""
+  )
+```
+
+Now how about some plots with one discrete and one continuous variable?
+
+```{r boxplot, echo=FALSE}
+dnew %>% 
+  ggplot(mapping = aes(x = gender, y = goodFood)) + 
+  geom_violin() +
+  theme_bw() + 
+  labs(
+    title = "Box plot of good food ratings by gender",
+    y = "Rating on 1-10 scale",
+    x = "Gender"
+  )
+```
+
+# Day 2
+
+## Adding coolness
+
+First let's put multiple geoms together
+
+```{r multiplegeoms, echo=FALSE}
+dl %>% 
+  ggplot(mapping = aes(x = year,y = rating, colour=question)) + 
+  geom_violin(show.legend=FALSE) +
+  geom_jitter(show.legend=FALSE) +
+  facet_wrap(~question) +
+  theme_bw() + 
+  labs(title = "Violin plot of all food ratings over time",
+    y = "Rating on 1-10 scale",
+    x = "Year")
+```
+
+Let's also do some playing with colour. First, let's make a slightly different dataset.
+
+```{r makelong2, echo=FALSE}
+dl2 <- d %>%
+  pivot_longer(-c(name,gender,species,year),names_to="question",values_to="rating")
+```
+
+Now let's do a bunch of density plots with a different palette.
+
+```{r densityplotpalette, echo=FALSE}
+dl2 %>% 
+  ggplot(
+    mapping = aes(
+      x = rating,
+      fill = question
+    ) 
+  ) + 
+  geom_density(alpha=0.6) +
+  scale_fill_brewer(palette="Accent") +
+  facet_wrap(~species) +
+  theme_bw() + 
+  labs(
+    title = "Density plot of individual question distributions",
+    y = "Answer density",
+    x = "Rating"
+  )
+```
+
+And another way of combining things for cool effects with box plots
+
+```{r boxplotpalette, echo=FALSE, fig.width=10, fig.height=5}
+dl %>% 
+  ggplot(
+    mapping = aes(
+      x = question,
+      y = rating,
+      fill = question,
+      colour = question
+    ) 
+  ) + 
+  geom_boxplot(alpha=0.4) +
+  geom_jitter(alpha=0.7) +
+  scale_fill_brewer(palette="Set1") +
+  scale_color_brewer(palette="Set1") +
+  facet_wrap(~species) +
+  theme_bw() + 
+  labs(
+    title = "Boxplot plot of question ratings by species and type",
+    y = "Rating",
+    x = "Question type"
+  )
+```
+
+
+We can save using the `ggsave` function. It defaults to saving the last plot generated, but you can also assign the plot to a variable and give that variable as an argument. It automatically saves in the directory you are in, and takes an argument indicating what kind of file you want to save it as.
+
+```{r savingplot, echo=FALSE}
+ggsave(filename="boxplotpalette.jpg",device="jpeg")
+ggsave(filename="densityplot.png",plot=density_plot,device="png")
+
+```
+
+
+## Bar plots and error bars
+
+To make bar plots we first need to calculate the summary statistics we want to do them over
+
+```{r simplebarplot, echo=FALSE}
+dl_sum <- dl %>% 
+  group_by(question) %>% 
+  summarise(mean = mean(rating),
+            sd = sd(rating),
+            n = n(),
+            sdErr = sd/sqrt(n)) %>%
+  ungroup()
+
+dl_sum %>% 
+  ggplot(mapping = aes(x = question,y = mean,fill = question)) + 
+  geom_jitter(data=dl,
+              mapping=aes(x=question,y=rating,colour=question),
+              alpha=0.7,show.legend=FALSE) +
+  geom_col(alpha=0.4,show.legend=FALSE,colour="black") +
+  geom_errorbar(mapping=aes(ymin = mean - sdErr, ymax = mean + sdErr), 
+                width=0.2) +
+  scale_fill_brewer(palette="Set1") +
+  scale_colour_brewer(palette="Set1") +
+  theme_bw() + 
+  labs(
+    title = "Barplot of question ratings",
+    subtitle = "People rated good food higher than bad food",
+    y = "Rating",
+    x = "Question type"
+  )
+```
+
+Finally, let's look at density plots over time.
+
+```{r densityplottime, echo=FALSE}
+dl %>% 
+  ggplot(
+    mapping = aes(
+      x = rating,
+      fill = question
+    ) 
+  ) + 
+  geom_density(alpha=0.6,show.legend=FALSE) +
+  scale_fill_brewer(palette="Accent") +
+  facet_wrap(~year) +
+  theme_bw() + 
+  labs(
+    title = "Density plot of individual question distributions",
+    y = "Answer density",
+    x = "Rating"
+  )
+```
