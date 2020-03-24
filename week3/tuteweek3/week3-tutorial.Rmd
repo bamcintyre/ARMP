@@ -57,7 +57,10 @@ library(lsr)
 # you'll need to add a few more libraries as you go
 
 # ** you need to load the data using the here() function, as in the example in class
-loc <- here("shadowsurvey.csv")
+
+loc <- here("tuteweek3", "shadowsurvey.csv")
+#not sure why the above broke--there are many Rproj files from various tutes and lectures about
+# and I think it may be confusing here command 
 d <- read_csv(file=loc)
 ```
 
@@ -99,6 +102,14 @@ d$goodFood <- apply(d[,goodFoods], MARGIN = 1,FUN = mean)
 #d$goodFood <- mean(d[,goodFoods])
 d$badFood <- apply(d[,badFoods], MARGIN = 1,FUN = mean)
  d[,goodFoods]
+d[c("name","goodFood", "badFood")]
+
+# time to use the mutate operator
+
+d %>% 
+  mutate(goodFood = apply(.[c("carrot", "cake", "bean", "meat")], MARGIN = 1, FUN = mean),
+         badFood = apply(.[c("mud", "dirt")], MARGIN = 1, FUN = mean)
+         ) 
 d[c("name","goodFood", "badFood")]
 ```
 
@@ -183,7 +194,6 @@ mysummary <- function(x) {
  names(result) <- c("Mean", "Median", "Mode", "10% QT", "90% QT")
  return(as.vector(result))
 }
-
 
 # So I wanted to make a table of these in a function but giving up now haha
 # i was defeated 
