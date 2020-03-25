@@ -34,6 +34,13 @@ dnew <- d %>%
 dnew
 ```
 
+```{r makenewvars_bruce, echo=FALSE}
+dnew_bruce <- d %>%
+  mutate(goodFood = apply(X = .[c("carrot","bean","cake","meat")], MARGIN = 1,FUN = mean),
+         badFood = apply(X = .[c("mud","dirt")], MARGIN = 1, FUN = mean)
+         )
+dnew_bruce
+```
 Then let's put this into long form by question type, and remove all of the specific questions leaving only `goodFood` and `badFood`:
 
 ```{r makelong, echo=FALSE}
@@ -43,6 +50,23 @@ dl <- dnew %>%
 dl
 ```
 
+```{r makelong_bruce, echo=FALSE}
+dl_bruce <- dnew_bruce %>%
+  pivot_longer(cols = c(goodFood, badFood), names_to = "question", values_to = "rating") %>%
+  filter(question == "goodFood" | question == "badFood")
+dl_bruce
+# why is this different 
+
+dnew_bruce %>%
+  select(goodFood, badFood)
+
+dnew_bruce %>%
+  select(-c(name, gender, species, year))
+
+# ok read the pivot_longer lecture again
+
+
+```
 Now let's make a plot!
 
 
