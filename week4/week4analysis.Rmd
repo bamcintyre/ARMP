@@ -56,15 +56,24 @@ dl_bruce <- dnew_bruce %>%
   filter(question == "goodFood" | question == "badFood")
 dl_bruce
 # why is this different 
+# ok read the pivot_longer vignette
+# so the cols argument reshape (either use or discard) all the columns given it.
+# so c(goodfood, badFood) will just use  these  2 columns 
+# all the food ones will be retained
+# -c(name, gender, species, year) will use all columns _aside_ from name gender sepecies year
 
-dnew_bruce %>%
-  select(goodFood, badFood)
+dl_bruce <- dnew_bruce %>%
+  pivot_longer(cols = -c(name,gender,species,year), names_to = "question", values_to = "rating") %>%
+  filter(question == "goodFood" | question == "badFood")
+dl_bruce
 
-dnew_bruce %>%
-  select(-c(name, gender, species, year))
-
-# ok read the pivot_longer lecture again
-
+# my previous code would have worked if i had selected those columns I want. 
+# This is clearer than using pivot as a selection tool.
+dl_bruce <- dnew_bruce %>%
+  pivot_longer(cols = c(goodFood, badFood), names_to = "question", values_to = "rating") %>%
+  select(name,gender,species,year,question, rating) %>%
+  filter(question == "goodFood" | question == "badFood")
+dl_bruce
 
 ```
 Now let's make a plot!
