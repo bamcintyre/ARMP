@@ -15,6 +15,9 @@ library(tidyverse)
 library(knitr)
 library(here)
 library(ggplot2)
+library(hrbrthemes)
+library(RColorBrewer)
+#library(papaja)
 
 loc <- here("shadowsurvey.csv")
 d <- read_csv(file=loc)
@@ -34,8 +37,7 @@ dnew <- d %>%
 
 # put in long form by question type
 dl <- dnew %>%
-  pivot_longer(-c(name,gender,species,year),names_to="question",values_to="rating") %>%
-  filter(question=="goodFood" | question=="badFood")
+  pivot_longer(-c(name,gender,species,year),names_to="question",values_to="rating") %>%   filter(question=="goodFood" | question=="badFood")
 ```
 
 1. Below is the code presented in lecture for the basic graph. Run it.
@@ -65,20 +67,71 @@ dl %>%
 2. Now take the code above but make the following changes: (a) Put the year on the y-axis and the rating on the x-axis; (b) Change the axis labels accordingly; (c) add the parameter alpha=0.5 as an argument to geom_jitter(). Run it. What do you think the alpha parameter does? What would alpha=0.1 or alpha=1 look like? (HINT: experiment around to find the answer to this)
 
 ```{r day1gg2, echo=FALSE, fig.height=5}
-
+dl %>% 
+  ggplot(
+    mapping = aes(
+      x = rating, 
+      y = year,
+      colour = question
+    ) 
+  ) + 
+  geom_jitter(size=3, alpha = 0.5) +
+  geom_rug() + 
+  facet_wrap(~gender) +
+  theme_bw() + 
+  labs(
+    title = "Food ratings over time",
+    subtitle = "Varying question type and gender",
+    x = "Rating on 1-10 scale",
+    y = "Year"
+  )
 ```
 
 3. Replace the `facet_wrap(~gender)` line with `facet_grid(question~gender)`. What happens? How is this different from `facet_grid(gender~question)`? How would you say `facet_wrap()` is different from `facet_grid()`?
 
 ```{r day1gg3, echo=FALSE, fig.height=5}
-
+dl %>% 
+  ggplot(
+    mapping = aes(
+      x = rating, 
+      y = year,
+      colour = question
+    ) 
+  ) + 
+  geom_jitter(size=3, alpha = 0.5) +
+  geom_rug() + 
+  facet_grid(question~gender) +
+  theme_bw() + 
+  labs(
+    title = "Food ratings over time",
+    subtitle = "Varying question type and gender",
+    x = "Rating on 1-10 scale",
+    y = "Year"
+  )
 ```
 
 
 4. See if you can figure out how to change the shape of the points from circles to triangles. HINT: the ggplot cheatsheet might be helpful here, as might be googling.
 
 ```{r day1gg4, echo=FALSE, fig.height=5}
-
+dl %>% 
+  ggplot(
+    mapping = aes(
+      x = rating, 
+      y = year,
+      colour = question
+    ) 
+  ) + 
+  geom_jitter(shape = "triangle", size=3, alpha = 0.5) +
+  geom_rug() + 
+  facet_grid(question~gender) +
+  theme_bw() + 
+  labs(
+    title = "Food ratings over time",
+    subtitle = "Varying question type and gender",
+    x = "Rating on 1-10 scale",
+    y = "Year"
+  )
 ```
 
 ## Fun with geoms
@@ -87,12 +140,31 @@ dl %>%
 
 ```{r day1geom1, echo=FALSE, fig.height=5}
 
+q_one <- dnew %>%
+  pivot_longer(cols = -c(name,gender,species,year), 
+               names_to = "question", 
+               values_to = "rating") %>%
+  filter(question == "badFood" & rating != is.na(rating)) %>%
+  ggplot(mapping = aes(x = rating)) +
+      geom_histogram(binwidth = 0.5,fill = "blue") +
+  scale_x_continuous(n.breaks = 6, limits = c(0,10)) +
+ # theme_classic() +
+#  scale_fill_binned() +
+  labs(title = "Histogram of bad food ratings", 
+       x = "rating on a 1-10 scale",
+       y = "number of people") 
+
+q_one
 ```
 
 
 2. CHALLENGE: Using the `dl` dataset and `facet_wrap`, a figure with two panels where one panel corresponds to the goodFood variable and one to the badFood variable. See if you can figure out how to make the two variables different colours.
 
 ```{r day1geom2, echo=FALSE, fig.height=5}
+dl %>%
+  ggplot(mapping = aes(x=rating, fill=question)) +
+  geom_histogram(binwidth = 0.5, show.legend = FALSE) +
+  facet_wrap(vars(question)) 
 
 ```
 
@@ -100,7 +172,9 @@ dl %>%
 3. Using the `dl` dataset make a boxplot of ratings by question type, and then a violin plot of ratings by question type. Which do you think offers the best summary of the data, and why?
 
 ```{r day1geom3, echo=FALSE, fig.height=5}
-
+dl %>%
+  ggplot(aes(x = question, y = rating)) +
+  geom_violin(draw_quantiles = c(.25,.5,.75)) 
 ```
 
 
@@ -111,19 +185,37 @@ dl %>%
 1. Instead of doing a violin plot of food ratings over time (with goodFood and badFood split into different panels), as in lecture, do the same thing with a box plot. As before, add points to the plot using `geom_jitter`. 
 
 ```{r day2cool1, echo=FALSE, fig.height=5}
+dl %>%
+  ggplot(aes(x = year, y = rating, colour = year)) +
+  geom_boxplot( show.legend = FALSE) +
+    geom_jitter(alpha = .3, width = 0.1, show.legend = FALSE) +
+  facet_wrap(vars(question)) 
 
 ```
 
 2. Take your previous plot in #1 and change the theme to `theme_minimal`. Then change the palette to the `Dark2` one from ColorBrewer.
 
 ```{r day2cool2, echo=FALSE, fig.height=5}
+dl %>%
+  ggplot(aes(x = year, y = rating) )+
+  geom_boxplot(show.legend = FALSE, aes(fill = year, colour = year)) +
+    scale_color_brewer(palette = "Dark2") +
+  scale_fill_brewer(palette = "Dark2") +
+  geom_jitter(alpha = .2, width = 0.1, show.legend = FALSE) +
+    facet_wrap(vars(question)) +
+  theme_minimal() 
+  
 
 ```
 
 3. Use the `dl` dataset to make a density plot where each facet is a different species but instead of showing each of the six questions, it just shows goodFood and badFood. Use whatever palette you want from ColorBrewer to fill the densities in with, and make them semi-transparent.
 
 ```{r day2cool3, echo=FALSE}
-
+dl %>% ggplot(aes(x=rating, fill=question)) +
+    geom_density(alpha = .7) +
+  facet_wrap(~species) +
+  scale_fill_brewer(type="qual", palette = sample(1:8, 1, replace = FALSE))
+  
 ```
 
 ## Miscellaneous
@@ -131,23 +223,92 @@ dl %>%
 1. Assign the last plot you did (in #3 under Adding coolness) to a variable, and save that plot as a png file.
 
 ```{r day2misc1, echo=FALSE}
-
+my_cool_plot <- dl %>% ggplot(aes(x=rating, fill=question)) +
+    geom_density(alpha = .7) +
+  facet_wrap(~species) +
+  scale_fill_brewer(type="qual", palette = sample(1:8, 1, replace = FALSE))
+my_cool_plot
+ggsave(filename = "my_cool_plot", plot = my_cool_plot, device = "png")
+unlink("my_cool_plot")
 ```
 
 2. Now we're goign to make a bar graph with error bars where each bar corresponds to the mean rating for each of the six individual questions. The first step is to use summarise() and group_by() to make a summary dataset called `dl2_sum` where each row is one of the six questions and the columns are the mean rating, the sd of the ratings, the n, and the standard error. 
 
 ```{r day2misc2, echo=FALSE}
-
+d_summary <- d %>%
+  pivot_longer(cols = -c(name,gender,species,year), 
+               names_to = "question", 
+               values_to = "rating" ) %>%
+  group_by(question) %>%
+  summarise(
+    mean = mean(rating),
+    sd = sd(rating),
+    n = n(),
+    stdErr = sd/sqrt(n)
+  ) %>%
+  ungroup() %>%
+    arrange(mean)
 ```
 
 3. Now create the bar plot (with error bars) using that dataset.
 
 ```{r day2misc3, echo=FALSE}
-
+d_summary %>% ggplot(aes(x = reorder(question, -mean), 
+                         y = mean, 
+                         fill = question) ) +
+  geom_col(show.legend = FALSE, colour = "black") +
+  geom_errorbar(
+    mapping = aes(
+    ymin = mean - stdErr,
+    ymax = mean + stdErr
+  ), width = 0.2
+  ) +
+  theme_bw() +
+  scale_fill_brewer(type = "qual", palette = sample(1:8, size = 1)) +
+  labs(
+    x = "Food type",
+    y = "Mean rating",
+    title = "Mean food rating by type"
+  )
 ```
 
 4. CHALLENGE: Make something like the bar plot above and but with different facets corresponding to different questions and within each facet showing all of the years of answers of that question. (NOTE: you'll have to make a new summary dataset where you group by year as well).
 
 ```{r day2misc4, echo=FALSE}
+d %>%
+  pivot_longer(
+    cols = c(cake, meat, carrot, bean, dirt, mud),
+    names_to = "food",
+    values_to = "rating"
+  ) %>%
+  select(name, gender, species, year, food, rating) %>%
+  group_by(food, year) %>%
+  # preparing the summary
+  
+  summarise(
+    mean = mean(rating),
+    sd = sd(rating),
+    n = n(),
+    stdErr = sd / sqrt(n)
+  ) %>%
+  ungroup() %>%
+  # plotting
+  ggplot(aes(x = year, 
+             y = mean, 
+             fill = factor(year))) +
+  facet_wrap( ~ food) +
+  geom_col(colour = "black", 
+           show.legend = FALSE) +
+  geom_errorbar(aes(ymin = mean - stdErr, ymax = mean + stdErr),
+                width = 0.3,
+                show.legend = FALSE) +
+  theme_bw() +
+  scale_fill_brewer(type = "seq", 
+                    palette = sample(1:18, 1)) +
+  labs(title = "Rating of foods, 2016-2020",
+       x = "Year",
+       y = "Mean rating (0-8)"
+  )
+
 
 ```
