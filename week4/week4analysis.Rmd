@@ -68,11 +68,10 @@ dl_bruce <- dnew_bruce %>%
 dl_bruce
 
 # my previous code would have worked if i had selected those columns I want. 
-# This is clearer than using pivot as a selection tool.
+# This is clearer than using pivot as a selection tool, but less tidy because havent transformed all into key/value pairs. not sure what is better!
 dl_bruce <- dnew_bruce %>%
   pivot_longer(cols = c(goodFood, badFood), names_to = "question", values_to = "rating") %>%
-  select(name,gender,species,year,question, rating) %>%
-  filter(question == "goodFood" | question == "badFood")
+  select(name,gender,species,year,question, rating)  
 dl_bruce
 
 ```
@@ -100,6 +99,12 @@ dl %>%
   )
 ```
 
+  ```{r makefirstplot_bruce, run=FALSE}
+dl_bruce %>%
+  ggplot(
+    mapping = aes(x = )
+  )
+```
 ## Geoms
 
 Let's play with geoms a bit. First, let's consider the kinds of geoms that take only one continuous variable, like histograms.
