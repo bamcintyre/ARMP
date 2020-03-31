@@ -251,8 +251,15 @@ Let's now look at each of the foods and how they've changed over time per capita
 dls_pc
 dls_pc %>% ggplot(aes(y=amount,x=year)) +
     geom_boxplot() +
-  geom_point(aes( colour = food),show.legend = FALSE, alpha = 0.5) +
-  facet_wrap(~food, scales = "free")
+  geom_point(aes( colour = food, size = (population * 10)),show.legend = FALSE, alpha = 0.7) +
+  facet_wrap(~food, scales = "free") +
+  theme_bw() +
+  scale_colour_brewer(type = "qual", palette = sample(1:8,1)) +
+  labs(
+    title = "Per capita food consumption at otherland farms",
+    y = "consumption",
+    x = "Year"
+  )
 ```
 
 # Q10
