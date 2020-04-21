@@ -1,0 +1,259 @@
+---
+title: "Week 6 Tutorial Exercises"
+author: "Amy Perfors"
+output: html_document
+---
+
+Everyone is distraught at LFB's absence, and nobody knows what to do. The data so far seems to suggest that the Others are experiencing food shortages as well, but not everybody believes it. Shadow and Flopsy therefore propose a few additional analyses on that dataset.
+
+```{r setup, include=FALSE}
+# We'll begin by loading up the libraries and data we need, as always.
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading the libraries
+library(tidyverse)
+library(knitr)
+library(here)
+library(skimr)
+library(ggplot2)
+library(RColorBrewer)
+
+# load the data
+loc <- here("stolendata.csv")
+d <- read_csv(file=loc)
+d$year <- as.factor(d$year)
+
+# this defines the same datasets you defined last time
+# dataset ds combines many columns
+ds <- d %>% 
+  mutate(protein = (chickens+eggs+cows+pigs)/4,
+         veg = (wheat+corn+carrots+lettuce+potatoes+strawberries)/6) %>%
+  select(year,location,population,protein,veg,water)
+
+# ds_pc is a per capita version of this
+ds_pc <- ds %>%
+  mutate(proteinPC = protein/population,
+         vegPC = veg/population,
+         waterPC = water/population) %>%
+  select(year,location,population,proteinPC,vegPC,waterPC)
+
+# long form version of this
+dls_pc <- ds_pc %>%
+  pivot_longer(-c(year,population,location),names_to="food",values_to="amount")
+
+# long form version of original so we can look at foods individually
+dl <- d %>%
+  pivot_longer(-c(year,population,location),names_to="food",values_to="amount") %>%
+  mutate(pcAmount = amount/population)
+```
+
+# Q1 
+
+Let's start just by changing the colour palette of one of the graphs we made last week. The code for that graph is below. Make it so it uses a palette of your choice from the Color Brewer library. (Note: you may find that some palettes don't work. Based on the error message, can you figure out why this is?) Assign the plot to a variable called `dl_plot` and save it as a .png file named *percapitafoodovertime.png*. Where is it saved, and why?
+
+```{r q1chunk, echo=FALSE, fig.height=10}
+dl_plot <- dl %>% 
+  ggplot(
+    mapping = aes(x = year, y = pcAmount, fill=food)) + 
+  geom_boxplot(show.legend=FALSE) +
+  geom_jitter(alpha=0.4,size=1,show.legend=FALSE) +
+  facet_wrap(~food,scales="free") +
+  theme_bw() + 
+  scale_fill_brewer(type = "qual", palette = 3) +
+  labs(
+    title = "Per capita food over time",
+    x = "Year",
+    y = "Per capita food"
+  )
+
+ggsave( filename = "percapitafoodovertime.png", plot = dl_plot, device = png())
+```
+
+# Q2
+
+Okay, now we're going to make a bar graph showing per capita change in each food over time. As a first step, you'll need to create a tibble that has the format you need. Make one called `dl_sum` which has columns corresponding to the mean, standard deviation, n, and sdErr of per capita amount for every food item at every year.
+
+```{r q2chunk}
+dl_sum <- dl %>%
+  group_by(year, food) %>%
+  summarise(
+    "mean" = mean(pcAmount),
+    "SD" = sd(pcAmount),
+    "n" = n(),
+    "sdErr" = sd(pcAmount)/sqrt(n())
+  ) %>%
+  ungroup()
+```
+
+# Q3
+
+Take `dl_sum` and create a simple bar chart using `geom_col()` with year on the x axis, mean per capita amount on the y axis, and the fill colour corresponding to the food. Don't put things into different facets and don't worry about error bars or individual data points, but do make it look nice with appropriate titles and labels, and a colour palette that you like.
+
+```{r q3chunk, echo=FALSE, fig.height=5}
+dl_sum %>%
+  ggplot(aes(x = year, y = mean, fill = food)) +
+  theme_bw()+
+  scale_fill_brewer(type = "div", palette = sample(1:8, 1)) +
+  geom_col(show.legend = TRUE) +
+  labs (
+    title = "Per capita food by time",
+    x = "Year",
+    y = "Per capita mean food"
+  )
+```
+
+# Q4
+
+You'll notice that it defaulted to stacked bars. There are ways you can make it do different things (which you can google if you like) but for now just put the different foods into different facets and see if that does the trick to make them not stacked anymore. Remember that you might need to tell R to use different scales on the y axis in each facet (last week in the tutorial we learned how to do that).
+
+```{r q4chunk, echo=FALSE, fig.height=8}
+dl_sum %>%
+  ggplot(aes(x = year, y = mean, fill = food)) +
+  facet_wrap(~food, scales = "free") +
+  theme_bw()+
+  scale_fill_brewer(type = "div", palette = sample(1:8, 1)) +
+  geom_col(show.legend = FALSE) +
+  labs (
+    title = "Per capita food by time",
+    x = "Year",
+    y = "Per capita mean food"
+  )
+```
+
+# Q5
+
+Alright, let's add some error bars! You've already calculated the statistics you need (sdErr in this case) so just add them in.
+
+```{r q5chunk, echo=FALSE, fig.height=8}
+dl_sum %>%
+  ggplot(aes(x = year, y = mean, fill = food)) +
+  facet_wrap(~food, scales = "free") +
+  theme_bw()+
+  scale_fill_brewer(type = "div", palette = sample(1:8, 1)) +
+  geom_col(show.legend = FALSE) +
+  geom_crossbar(aes(ymin = mean-sdErr, ymax = mean+sdErr), 
+                width = 0.01) +
+  labs (
+    title = "Per capita food by time",
+    x = "Year",
+    y = "Per capita mean food"
+  )
+```
+
+# Q6
+
+Take your plot from question 5 and make it so the error bars reflect standard deviation, not standard error. (Hint: you've already calculated standard deviation, you just need to change the information you're giving to `geom_errorbar`). Are the error bars larger or smaller than standard error? Why do you suppose this is?
+
+```{r q6chunk, echo=FALSE, fig.height=8}
+dl_sum %>%
+  ggplot(aes(x = year, y = mean, fill = food)) +
+  facet_wrap(~food, scales = "free") +
+  theme_bw()+
+  scale_fill_brewer(type = "div", palette = sample(1:8, 1)) +
+  geom_col(show.legend = FALSE) +
+  geom_crossbar(aes(ymin = mean-SD, ymax = mean+SD), 
+                width = 0.01) +
+  labs (
+    title = "Per capita food by time",
+    x = "Year",
+    y = "Per capita mean food"
+  )
+```
+
+
+# Q7
+
+CHALLENGE: Now add individual data points to your bar plot. Note that you may have to make the bars semi-transparent if they aren't there already. Also remember that you'll need to refer to a different tibble than `dl_sum` for this part of the figure; part of the challenge here is to figure out which one.
+
+```{r q7chunk, echo=FALSE, fig.height=10}
+dl_sum %>%
+  ggplot(aes(x = year, y = mean, fill = food)) +
+  facet_wrap(~food, scales = "free") +
+  theme_bw()+
+  scale_fill_brewer(type = "div", palette = sample(1:8, 1)) +
+  geom_col(show.legend = FALSE) +
+  geom_crossbar(aes(ymin = mean-SD, ymax = mean+SD), 
+                width = 0.01) +
+  geom_jitter(data = dl, aes(x= year, y = pcAmount ))+
+  labs (
+    title = "Per capita food by time",
+    x = "Year",
+    y = "Per capita mean food"
+  )
+```
+
+Miracle of miracles, these analyses are helpful: everyone at least agrees that food per capita in the districts in Otherland in their dataset does seem to be going down (although this is still only a description of the dataset rather than an inference about the overall population of Otherland). However, there is still a lot of disagreement about what to do about it and what this means.
+
+"How do we know these records weren't falsified?" asks Gladly. "Maybe the Others want us to think they're in the same situation but they really aren't."
+
+"That makes no sense," scoffs Shadow. "They couldn't know we'd try to steal their data." Everyone murmurs in agreement, and Gladly finally nods too.
+
+After a pause, Bunny ventures a thought. "Maybe the problem is that the weather is changing?" she asks. "If it's raining less or more than it used to, maybe none of us can grow as much."
+
+"That's a great idea, Bunny," says Flopsy. "But their records indicate that water stores are the one thing that *doesn't* look like it's changing. So I would say the probability of rain tomorrow is about the same as it was yesterday."
+
+"I disagree," says Doggie. "It doesn't make sense to talk about the probability of a single thing like rain tomorrow. Either it happens or it doesn't. I don't think you know much about probability, Flopsy."
+
+"You're being rude," interjects Shadow in Flopsy's defense. "Flopsy is being perfectly consistent. You two just have different theories of probability."
+
+# Q8
+
+In this dialogue, Flopsy and Doggie are exemplifying the different attitudes towards probability of Bayesians and frequentists. Which one is Flopsy, and which is Doggie? Why? Do you think Flopsy would say that probabilities are objectively part of the world or subjectively in the head?
+
+# Q9
+
+"Be that as it may," Gladly says finally. "We still have to figure out what to do. I think we should send people to Otherland to try to rescue LFB. We can't let them get away with this!"
+
+"But you guys couldn't find her at all," says Bunny. "What do you think the odds of success would be?"
+
+"I don't know," says Gladly. "But even if it's like only 10% don't we have to try?"
+
+"We don't have that many people and resources," says Flopsy. "Say we can get 8 volunteers. Would the chance of finding her be worth the effort?"
+
+"Let's figure out the probabilities involved here first," says Shadow. "I can think of a few relevant questions:"
+
+(a) Given 10% odds of success and eight missions, what are the odds of exactly 0 of those missions being successful? What about if there were four missions rather than eight?
+
+(b) If we ran eight missions with 10% odds of success each, what is the median number of successes we could expect? (I know it doesn't make much sense to talk about more than one success here, because once we find LFB we'll stop, but calculating this will still give us a sense of the difficulty involved in having even one success).
+
+Can you answer Shadow's two questions? Hint: you'll need to use your knowledge of either the binomial or normal distribution.
+
+```{r q9chunk}
+# question (a) 
+dbinom(x = 0,size=8,prob = .1)
+dbinom(x = 0,size=4,prob = .1)
+
+# question (b)
+pbinom(q = c(.5), size = 8, prob = 0.1)
+
+qbinom(p = c(.1,.2,.3,0.5, 0.6, 0.7), size = 8, prob = 0.1)
+```
+
+
+# Q10
+
+"These odds don't look very good," says Bunny. "I don't think we should find LFB. I miss her and love her but it makes no sense to lose more people just to get one person back."
+
+"I disagree," says Gladly. "I think these odds mean we absolutely *should* go rescue her."
+
+"It's easy to say that when you are probably not the one who would go," observes Doggie.
+
+"That's not fair!" objects Gladly.
+
+"Hey, it's a good point," says Shadow. "Let's survey people to see how much *they themselves* would be willing to go on such a mission, and also ask them how much they think *somebody* should go on a mission. We can ask for ratings on a 10-point scale, where 1 means absolutely not and 10 means absolutely."
+
+Everyone decides to go and do that. To have a sense of what their data might look like, generate 50 random draws from two normal distributions. For the first (the self question), it should be a normal distribution with a mean of 4 and a standard deviation of 1. For the second (the somebody else question), it should be a normal distribution with a mean of 6 and a standard deviation of 1.5. Draw both histograms. 
+
+```{r q10chunk, fig.height=5}
+hist(rnorm(n = 50, mean = 4, sd = 1))
+hist(rnorm(n= 50, mean = 6, sd = 1.5))
+```
+
+# Q11 
+
+Bunny returns, having conducted this survey on 50 people (note that the total population of Bunnyland is much larger than this). They find that the mean on the *self* question in their data is 4.03. Is this value the population mean, the sample mean, or the sampling distribution of the mean? Can you explain what the other two things are in this situation?
+
+# Q12
+
+Is the mean of the sampling distribution of the mean systematically different than the sample mean? Why or why not? How about the standard deviation of each? Why or why not?
+
