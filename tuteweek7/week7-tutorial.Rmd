@@ -1,0 +1,85 @@
+---
+title: "Week 7 Tutorial"
+author: "Amy Perfors"
+output: html_document
+---
+
+Everybody is very worried and Shadow and Bunny especially are concerned about preventing the worry from turning into full-scale panic. Bolstered by the reassuring and calming presence of Cuddly Paws, they start thinking a lot about how to measure the amount of worry and fear going around and what it would mean. 
+
+```{r setup, include=FALSE}
+# We'll begin by loading up the libraries and data we need, as always.
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading the libraries
+library(tidyverse)
+library(here)
+library(knitr)
+library(lsr)
+
+# load the data
+dw <- read_csv(file=here("worrysample.csv"))
+dg <- read_csv(file=here("gladlydata.csv"))
+dd <- read_csv(file=here("doggiedata.csv"))
+
+# area of each of the five districtions in Otherland
+area <- c(A=0.21,B=0.44,C=0.09,D=0.1,E=0.16)
+
+```
+
+1. Bunny guesses that the true population distribution of worry probably looks bimodal, with one peak of people who aren't very worried and another peak of people who are. Bunny fears that if that is the true population distribution, none of our statistics will work: even if they take repeated samples from this distribution and make repeated estimates of the mean, there is no reason that these estimates will be meaningful. Shadow insists that she is wrong: that because of the Central Limit Theorem, they know certain things about what to expect from their sampling distribution of the mean. 
+
+Shadow is correct. Name two things we know about the sampling distribution of the mean, no matter what the shape of the underlying true population distribution is.
+
+
+2. Shadow collects data from 100 people, asking each of them to rate their level of worry on a scale of 0 to 100, where 0 means no worry at all and 100 is maximum level of worry. This data is in the tibble `dw` which has already been loaded for you. It has one column called *score*. (a) Calculate the mean, standard deviation, and sample size n of this dataset. (b) Calculate the standard error. If the sample size was 10 times larger, would you expect that standard error would be larger or smaller? Why? (c) Calculate the 95% confidence interval of the mean. (d) How do you interpret the value you got in (c)?
+
+```{r q2}
+
+```
+
+3. Flopsy and Bunny are both wondering if the amount of worry is going up with time. Shadow proposes that they test this, by sampling a bunch of different people a week apart and asking them to rate their worry on the 0-100 scale above. They can then test if their answers are the same.
+
+(a) If they did this, what is their research hypothesis? (b) What is the research null hypothesis? (c) What is the statistical null hypothesis? (c) What is the statistical alternative hypothesis?
+
+
+4. Bunny tells Flopsy and Shadow that she would like to design a study that eliminates both Type I and Type II error. Is this even theoretically possible? Why or why not?
+
+
+5. Suppose Bunny runs a statistical test and finds a p-value of 0.03. (a) Suppose the null hypothesis is really "true"; is Bunny's result an error? If so, what kind? (Type I or Type II) If not, why not? (b) Suppose she runs a test and finds a p-value of 0.76. Suppose the null hypothesis is really "true"; is Bunny's result this time an error? If so, what kind? If not, why not?
+
+
+6. Flopsy runs a statistical tests and gets a p-value of 0.023. She states that "the null hypothesis is true, and the probability that this result was due to chance is 2.3%." What is wrong with Flopsy's statement? Can you rephrase it for her so it is correct?
+
+
+
+While Bunny, Flopsy, and Shadow debate abstract statistical theory, Gladly and Doggie are thinking about practical matters. Most people have voted to either attack the Others (Doggie's preference) or rescue LFB (Gladly's preference). Both of them take polls to get details on *how* people think these things should be done. Let's start with Doggie.
+
+7. Gladly polls people about where they think the rescue team should look for LFB. He asks about the five districts in Otherland (A-E). They don't know much about each district but they do know the area of each district. The `area` vector gives those areas, as a proportion of the total area of Otherland. Gladly's polling data can be found in the tibble `dg`, with the relevant information found in a column called *vote*. Both of those have been loaded automatically above. 
+
+Make a table of the voting data in `dg`, and also take a look at *area*.
+
+```{r q7}
+
+```
+
+8. Gladly is curious whether people have any idea about what they're doing or if their suggestions just reflect the area of each of the districts in question. To test this he is going to use a Goodness of Fit test. (a) How does he know that a Goodness of Fit test is the right one? (b) What are the O and E? (c) If the test statistic is high, is that *more* or *less* likely to be significant than if it is low? Why or why not?
+
+
+9. Perform a Goodness of Fit test and report the results, including the stat block for it and what it means in terms of Gladly's research hypothesis.
+
+```{r q9}
+```
+
+
+10. In the meantime, Doggie decides to poll people about how they think it would be best to attack the Others. He asks them to choose between three options: 1) performing a guerilla attack on important buildings in Otherland, destroying valuable infrastructure; 2) sneaking in and stealing their food; or 3) assassinating the Others leader. The results of this are in the tibble `dd` which was loaded above, with the relevant column being *vote*. Have a look at the table of the votes.
+
+```{r q10}
+
+```
+
+11. Doggie wants to compare people's responses against the null hypothesis that they are responding randomly and each option is equally probable. (a) Use a Goodness of Fit test to test this. (Hint: One of the exercises from Day 1 Week 6 had an analogous situation). (b) Report the results for this test, including the stat block for it and what it means in terms of Doggie's research hypothesis.
+
+```{r q11}
+
+```
+
