@@ -1,0 +1,187 @@
+---
+title: "Week 7 Exercises"
+author: "Amy Perfors"
+output: html_document
+---
+
+# Day 1: Goodness of fit tests
+
+**Note that there are slightly more exercises than usual but they should all take you less time. If you find that they are taking you more time than usual, let me know and I'll pare down accordingly.**
+
+After analysing the dataset from the lecture for Week 7, Day 1, the friends decided to take another vote with different people. The results are found in the `secondvoteresults.csv` file, which you'll use during these exercises. It contains 90 people and three columns:
+
+*person* which person voted
+
+*vote* their vote (Bunny (leave), Doggie (attack), Gladly (rescue), or Shadow (analyse))
+
+*species* what species the person who voted was (this wasn't in the other data file)
+
+```{r setup, include=FALSE}
+# We'll begin by loading up the libraries and data we need, as always.
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading the libraries
+library(tidyverse)
+library(here)
+library(ggplot2)
+library(knitr)
+
+# load the data
+d <- read_csv(file=here("secondvoteresults.csv"))
+dc <- read_csv(file=here("flopsyclothes.csv"))
+dw <- read_csv(file=here("weaponscache.csv"))
+dg <- read_csv(file=here("gladlytest.csv"))
+
+# comparison dataset from previous elections
+ed <- c(bunny=0.125,doggie=0.455,gladly=0.334,shadow=0.086)
+
+# comparison dataset showing base rates of each species in population
+sd <- c(bear=0.3,bunny=0.5,dog=0.2)
+```
+
+1. Let's start off by having a look at our new data. Make two tables. One (called `votingTable`) should show how many votes each person got. The other (called `speciesTable`) should show how many of each species are represented in the dataset. You can make your tables look nice using `kable()` if you want, but you don't have to, since this isn't where we're focusing in these exercises.
+
+```{r day1q1, echo=FALSE}
+votingTable <- d %>%
+  group_by(vote) %>%
+  summarise(
+    n = n()
+  ) %>%
+  ungroup() %>%
+  pivot_wider(names_from = "vote", values_from = "n")
+as.table(as.matrix(votingTable))
+class(votingTable)
+votingTable <- table(d$vote)
+votingTable
+class(votingTable)
+speciesTable <- d %>%
+  group_by(species) %>%
+summarise(
+  n = n()
+) %>%
+  ungroup() %>%
+  pivot_wider(names_from = "species", values_from = "n")
+speciesTable
+```
+
+2. We can ask the same question with this dataset as we did with the dataset in lecture: to what extent do these votes reflect support for the actual *option*, vs support for the person? Since we have the data from a previous election between those four people, we can answer this statistically: are these votes different from the distribution of votes in the election?
+
+Run a chi-squared goodness of fit test comparing the votes in this dataset to the election percentages in the `ed` vector.
+
+```{r day1q2}
+chisq.test()
+```
+
+3. What is the stats block for this test? (Note: you can make a superscript in R Markdown by typing ^2^)
+
+
+4. How do you interpret the results of this test, assuming an alpha threshold of 0.05?
+
+
+5. CHALLENGE: On slide 30 of the lecture I calculated the X^2^ value manually. Can you do so for this dataset? (Hint: you can check if you were correct if you get the same value you got in #2 above). 
+
+
+```{r day1q5}
+
+
+```
+
+
+
+6. Let's do another Goodness of Fit test! This time we want to see if our species were sampled representatively from the population (relative to each other). The `sd` vector shows the actual percentages of each species in the population (for simplicity, I'm including here just the three in the dataset, since there are relatively few other ones and I don't want you to get hung up on them; so these are normalised probabilities of each). Perform a Chi-Squared Goodness of Fit test comparing the numbers of each species in the voting data to the percentages in the population. Do they appear to reflect the same distribution?
+
+```{r day1q6}
+```
+
+
+7. CHALLENGE: Instead of asking whether our species were representatively sampled, we might want to know if they were each represented about the same amount in our dataset. In other words, instead of our null hypothesis given by `sd`, we might want it to be given by a vector where each of the individual probabilities is the same. See if you can figure out how to calculate this. Hint: it's the same `chisq.test()` function you've been using, you're just putting in something different for the `p` argument.
+
+```{r day1q7}
+
+```
+
+# Day 2
+
+## Tests of independence
+
+Amidst all of the tumult, Flopsy is having a bit of an identity crisis. She is sick of people thinking she's very girly due to her name and her colour, and decides to change her wardrobe to let more of what she feels is her true personality to come out -- brooding, thoughtful, shy. However, she has limited funds so she can only switch over a certain number of her clothes into different colours. She does so and asks Shadow if she can compare their distribution of clothing colours to see if they look different from each other. This dataset can be found in `dc`, which was automatically loaded for you above. Each row is one clothes item and it has the following two columns:
+
+*name*: flopsy or shadow
+
+*colour*: the colour of that item of clothing
+
+1. As always, we start by looking at our data. Make a table showing how many of each colour each person has.
+
+```{r day2q1}
+
+```
+
+2. Flopsy wants to compare the distribution of colours from their two closets. What is the null hypothesis here? What is the alternative? 
+
+
+3. You'll need to test this hypothesis using a chi-squared test of independence. How are the expected frequencies derived in this test? (Note: you do not actually need to do anything here, this is a conceptual question).
+
+4. Run the test of independence. 
+
+```{r day2q4}
+
+```
+
+5. Report the result of #4 no more than a few sentences. You may assume that you have put the table elsewhere in the paper so you don't need to include descriptive statistics; just refer to that table.
+
+
+6. Do you think Flopsy would be happy with this result? Why or why not?
+
+
+## Fisher exact test
+
+Since it seems like the majority of people want to attack the Others, Doggies decides that it would be a good idea to make an inventory of the weapons they all have. He therefore goes around taking a weapons census from two parts of Bunnyland Unfortunately there are not many so he has to expand his definition of "weapon" quite widely and even so ends up with very few. Still, he has some data, which has already been loaded for you and can be found in the `dw` dataset. Each row stands for one weapon and the two columns are:
+
+*location*: where the weapon was found, part A of Bunnyland or part B of Bunnyland
+
+*weapon*: what the weapon was. Unfortunately there were only three kinds: pillows, pool noodles (good for whacking people), and nerf darts.
+
+7. Have a look at your data by making a table of it.
+
+```{r day2q7}
+
+```
+
+8. Doggie wants to see if the two sides of down appear to have different distributions of weapons. Use a Fisher Exact test to determine this, and report the results in two sentences (as before, you can assume that the table itself was reported earlier).
+
+```{r day2q8}
+
+```
+
+
+## McNemar test
+
+Gladly has been feeling pretty insecure and dumb, seing everyone doing so well with learning R and feeling like he isn't learning very well. He realises that even if he's slower than some people, that's okay, as long as he's learning *something*. He therefore decides to give himself a self-test. In the pre-test he answers 100 questions about statistics and R. Then he studies for a day and takes a post-test on the same 100 questions. He wants to know if there is any improvement from pre-test to post-test. The data can be found in `dg`, which has already been loaded. Each row corresponds to one of the questions. The columns are *pre* and *post*, indicating whether he got that question right on the pre or post test.
+
+The table showing his results is below:
+
+```{r day2q9}
+testTable <- table(dg$pre,dg$post)
+kable(testTable,caption="Gladly's results: rows = pretest, columns = posttest")
+```
+
+9. Gladly wants to know if there is improvement from pre to post-test. We're going to do a McNemar test for this, because we cannot assume independence. (Why?) What cells in the table above are being compared in a McNemar test?
+
+
+10. Run a McNemar test and report the results.
+
+```{r day2q10}
+
+```
+
+
+11. For each of the following situations (A-D) say what test you would do.
+
+A. Nominal outcome variables, some cells are less than five
+
+B. One nominal outcome variable, compared to predicted values
+
+C. Two nominal outcome variables, but they are not independent.
+
+D. Two nominal outcome variables, and they are independent
+

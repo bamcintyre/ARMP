@@ -1,0 +1,150 @@
+---
+title: "Week 7 Analyses"
+author: "Amy Perfors"
+output: html_document
+---
+
+This is the code corresponding to the lectures in Week 7.
+
+```{r setup, include=FALSE}
+# We'll begin by loading up the libraries and data we need, as always.
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading the libraries
+library(tidyverse)
+library(here)
+library(ggplot2)
+library(lsr)
+library(knitr)
+
+# load the data
+loc1 <- here("votingresults.csv")
+d <- read_csv(file=loc1)
+loc2 <- here("twoboxesvotes.csv")
+d2 <- read_csv(file=loc2)
+loc3 <- here("meditationresults.csv")
+d3 <- read_csv(file=loc3)
+
+# comparison dataset
+ed <- c(bunny=0.125,doggie=0.455,gladly=0.334,shadow=0.086)
+```
+
+# Day 1
+
+## Goodness of Fit tests
+
+First (as always) let's look at our data, in the tibble called `d`
+
+```{r viewdata, echo=FALSE}
+votingTable <- table(d$vote)
+kable(votingTable,caption="Votes for what to do",col.names=c("Option","#Votes"))
+```
+
+Now let's calculate our test statistic manually:
+
+```{r teststat}
+O <- votingTable
+E <- 100 * ed
+Xsquared <- sum( (O-E)^2 / E )
+```
+
+Now let's simulate what you'd expect to see if the null hypothesis were true. The null hypothesis predicts that you would generate each observation with a binomial distribution in which the expected value is the probability. Let's actually do that sampling and show the resulting histograms.
+
+
+```{r binom}
+# first generate the samples from each
+bunny <- rbinom(n=25000, size=100,prob=0.125)
+doggie <- rbinom(n=25000, size=100,prob=0.455)
+gladly <- rbinom(n=25000, size=100,prob=0.334)
+shadow <- rbinom(n=25000, size=100,prob=0.086)
+# now put them together into a dataset
+sample <- c(bunny,doggie,gladly,shadow)
+person <- c(rep("bunny",25000),rep("doggie",25000),
+            rep("gladly",25000),rep("shadow",25000))
+dsample <- tibble(person,sample)
+
+
+dsample %>%
+  ggplot(mapping = aes(x=sample, fill=person)) +
+  geom_histogram(colour="black",binwidth=2) +
+  facet_wrap(~person) +
+  theme_bw() + 
+  labs(
+    title = "Samples under null hypothesis",
+    x = "Value",
+    y = "Frequency"
+  )
+
+```
+
+Now let's perform the Chi-Squared Goodness of Fit test comparing the votes for the options of what to do (`votingTable`, which we constructed from `d`) with the original votes in a previous election for our four friends (`ed`).
+
+```{r chisqgf}
+chisq.test(x=votingTable,p=ed)
+```
+
+# Day 2
+
+## Test of independence
+
+We're going to use a different dataset today, but it's already been loaded above. It's in the tibble called `d2` and as always we'll begin by looking at it:
+
+```{r table2boxes}
+boxesTable <- table(d2$vote,d2$box)
+boxesTable
+```
+
+Now let's do the Chi-Squared test of independence. Note that it uses the very same function as the Goodness of Fit test. The way it can tell what you want done is based on what arguments you give it. If you give it either a table of frequencies or an x and a y, it knows it needs to run a test of independence.
+
+```{r testind}
+chisq.test(x = boxesTable)
+chisq.test(x = d2$vote,d2$box)
+```
+
+## Miscellaneous
+
+Now we calculate Cramer's V. For this you need to have loaded the lsr package, which we already did above.
+
+```{r testind}
+# for our test of independence
+cramersV(x=boxesTable)
+
+# also for the goodness of fit test
+cramersV(x=votingTable,p=ed)
+```
+
+Let's now try Fisher's exact test. First we have a look at our bows data.
+
+```{r bowsdata}
+# make the bows data
+colour <- c("red","red","red","red","blue","blue","blue","blue")
+person <- c("bunny","bunny","bunny","gladly","bunny","gladly","gladly","gladly")
+dbows <- tibble(colour,person)
+
+# now let's make the table
+bowTable <- table(dbows$person,dbows$colour)
+bowTable
+```
+
+Chi-squared tests make R panicky...
+
+```{r chisqbow}
+chisq.test(x=bowTable)
+chisq.test(x=dbows$colour,y=dbows$person)
+```
+
+So let's try a Fisher exact test:
+
+```{r fisher}
+fisher.test(x=bowTable)
+```
+
+Let's now try McNemar test. First we'll take a look at our data, and then run the test.
+
+```{r meditationdata}
+# now let's make the table
+medTable <- table(d3$before,d3$after)
+medTable
+
+mcnemar.test(x=medTable)
+```
