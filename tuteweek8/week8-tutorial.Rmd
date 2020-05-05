@@ -1,0 +1,118 @@
+---
+title: "Week 8 Tutorial"
+author: "Amy Perfors"
+output: html_document
+---
+
+While Bunny and her friends are trying to figure out what's going on, Doggie and Gladly and their friends think the Others are responsible for their food woes. The question in their minds is what to do about it.
+
+"I still think we need to rescue LFB," maintains Gladly. "She would do the same for us, and the longer we wait the less likely we are to succeed."
+
+"We have no way of knowing where she is," Doggie argues. "It's a fool's errand. Far better to attack the Others. Not only will we get their food, we'll be able to stop them and also find out from them where LFB is."
+
+Cuddly Paws is silent, as always, but everyone can tell that he is troubled. He is there because he misses LFB but both of these options make him uneasy, and he hates it when anyone fights. He holds up a sign: "Maybe we could vote?"
+
+"We've voted on lots of things already," groans Yellow Quackers.
+
+"But we haven't voted *specifically* between these two options only, just among people who want to do something about the Others," points out Bear-Bear
+
+"True," says Gladly thoughtfully. "Okay, I'll conduct a survey asking people to choose between (a) go rescue LFB; (b) go attack the Others; or (c) both attack and rescue."
+
+"Not fair," says Doggie. "What if people choose (a) just because you're asking and they don't want you to feel bad?"
+
+"Good point," says Gladly. "Inter-rater reliability might be a real problem here."
+
+"I know," says Green Quackers. "Why don't you both ask different people? Then if the distributions of votes you get are the same, you know inter-rater reliability wasn't a problem."
+
+"Good idea," says Doggie, and everyone else agrees too. Doggie and Gladly both thus ask different people this question. The results are found in the tibble `dvote`, which has been loaded for you. It contains two columns: *asker* indicates whether the person asking the question was Doggie or Gladly, and *vote* indicates which of the three options was chosen (attack, rescue, or both).
+
+```{r setup, include=FALSE}
+# We'll begin by loading up the libraries and data we need, as always.
+knitr::opts_chunk$set(echo = TRUE)
+
+# loading the libraries
+library(tidyverse)
+library(here)
+library(knitr)
+library(lsr)
+
+# load the data
+dvote <- read_csv(file=here("votingoptions.csv"))
+dattack <- read_csv(file=here("attackers.csv"))
+dsearch <- read_csv(file=here("searchers.csv"))
+
+```
+
+1. Suppose you wanted to determine whether the distribution of votes for Doggie vs Gladly was the same. What is the statistical hypothesis and the statistical null hypothesis? What statistical test would you do to determine this, and why?
+
+2. How is the test statistic for the Test of Independence different from the test statistic for the Goodness of Fit test, and why?
+
+3. Use `dvote` to make a table (call it `voteTable`) which shows how many votes of each response Gladly and Doggie each obtained.
+
+```{r q3}
+
+```
+
+4. Use a Chi-Squared Test of Independence to evaluate whether the distribution of votes was the same for them. What is the test statistic, the degrees of freedom, and the p-value? Based on the results, what do you conclude?
+
+```{r q4}
+
+```
+
+
+5. What is the effect size, and how should you interpret it?
+
+```{r q5}
+
+```
+
+
+6. Suppose that instead of Gladly and Doggie each asking separate people this question, they asked the same people at different times? Would you still use a Test of Independence to figure out if the distributions were the same? If so, why? If not, what would you use instead, and why?
+
+
+It seems evident that most people want to both rescue LFB *and* attack the others, so Gladly and Doggie decide to get a group together to go to Otherland. The plan is to travel together at the border, and then split up. While one group creates a diversion by attacking the main government buildings in Otherland, the other group will search for LFB.
+
+In order to decide who will go in each group, they decide to measure each person's level of *spy ability* and *aggressiveness*. The idea is to put the best spies in the group that will search for LFB and the most aggressive people in the group that attacks.
+
+The *spy* measure has been normed to have a mean of 14.4 and a standard deviation of 2.3, while the *aggressiveness* measure normally has a mean of 54.3 and a standard deviation of 6.3.
+
+7. Wiggly Tail has a *spy* score of 14.6 and an *aggressiveness* score of 55.0. Assuming each person should go in the group which corresponds to their highest z-score, which group should Wiggly Tail go with? Why do we use z-scores for this instead of just the raw scores? (You can put your calculations in the R code chunk below).
+
+```{r q7}
+
+```
+
+8. The data frames `dattack` contains the *aggressiveness* scores for all the people who ended up deciding to join the attacking group, while `dsearch` contains the *spy* scores for all of the people who joined the search group. (Both of these are in the column called *score*). Manually calculate the test statistic for each of them, assuming the true population mean under the null hypothesis is 14.4 for *spy* and 54.3 for *aggressiveness*.
+
+```{r q8}
+
+```
+
+9. Use a one-sample t-test to determine whether each of the groups scores higher than the normed mean for their respective measures (i.e., whether the attack group has a higher mean *aggressiveness* score than 54.3 and the search group has a higher mean *spy* score than 14.4). Was your test statistic calculation in #8 correct? What do the results indicate about the null hypothesis? How might you interpret these results?
+
+```{r q9}
+
+```
+
+
+10. Without running it, can you predict what the p-value for the one-sided version of the t-test for the *spy* score is? Why is it that value? Test your prediction, and explain how you chose whether to set the alternative to ``greater`` or ``less``.
+
+```{r q10}
+
+```
+
+* * *
+
+Having split into groups, and preparing for action, everyone sets off. Doggie, Gladly, and the others are nervous but excited. They hope to be heroes, rescuing LFB and solving everyone's food problems.
+
+After a few hours of traveling, it is late afternoon and everyone is getting tired. Suddenly, Gladly hears a noise in the forest ahead of them, and he shouts: "Who goes there?"
+
+For a long tense moment there is no sound except for the soft rustle of the leaves in the trees. Then a gruff voice shouts back: "Show yourselves. This is Otherland."
+
+Doggie tenses and holds up his staff, preparing to use it if necessary. "We're looking for one of our friends, who you kidnapped," he shouts in return. "Where is she?"
+
+Another long moment. Everyone slowly crowds behind Doggie and Gladly, holding their weapons at the ready.
+
+The leaves part, revealing a large group of Others, led by the biggest bear anybody of them has ever seen. All of the Others have their own weapons, which they are holding ready as well. The bear growls. "If you want to fight, let's fight," he says.
+
+... TO BE CONTINUED NEXT WEEK ...
